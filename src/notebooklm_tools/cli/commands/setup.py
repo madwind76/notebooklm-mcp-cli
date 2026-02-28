@@ -43,7 +43,7 @@ def _read_json_config(path: Path) -> dict:
     if not path.exists():
         return {}
     try:
-        return json.loads(path.read_text())
+        return json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
         return {}
 
@@ -51,7 +51,7 @@ def _read_json_config(path: Path) -> dict:
 def _write_json_config(path: Path, config: dict) -> None:
     """Write a JSON config file, creating parent dirs as needed."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(config, indent=2) + "\n")
+    path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
 
 
 def _is_configured(config: dict, key: str = "notebooklm-mcp") -> bool:

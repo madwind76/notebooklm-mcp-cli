@@ -123,7 +123,7 @@ def check_install_status(tool: str, level: str = "user") -> tuple[bool, Optional
         # Check for markers in AGENTS.md
         if not install_path.exists():
             return False, install_path
-        content = install_path.read_text()
+        content = install_path.read_text(encoding="utf-8")
         return "<!-- nlm-skill-start -->" in content, install_path
     elif config["format"] == "all":
         # Check if export directory exists
@@ -134,7 +134,7 @@ def check_install_status(tool: str, level: str = "user") -> tuple[bool, Optional
 
 def _inject_version_to_frontmatter(skill_path: Path) -> None:
     """Inject the current package version into the SKILL.md YAML frontmatter."""
-    content = skill_path.read_text()
+    content = skill_path.read_text(encoding="utf-8")
     if content.startswith("---"):
         # Find the closing --- of frontmatter
         end_idx = content.index("---", 3)
@@ -147,7 +147,7 @@ def _inject_version_to_frontmatter(skill_path: Path) -> None:
     else:
         # No frontmatter — prepend one with version
         content = f"---\nversion: \"{__version__}\"\n---\n\n" + content
-    skill_path.write_text(content)
+    skill_path.write_text(content, encoding="utf-8")
 
 
 def _get_installed_version(tool: str, level: str) -> Optional[str]:
@@ -163,7 +163,7 @@ def _get_installed_version(tool: str, level: str) -> Optional[str]:
         if not install_path.exists():
             return None
         try:
-            content = install_path.read_text()
+            content = install_path.read_text(encoding="utf-8")
             match = re.search(r'<!-- nlm-version: ([\d.]+) -->', content)
             return match.group(1) if match else None
         except Exception:
@@ -179,7 +179,7 @@ def _get_installed_version(tool: str, level: str) -> Optional[str]:
         return None
 
     try:
-        content = skill_file.read_text()
+        content = skill_file.read_text(encoding="utf-8")
         match = re.search(r'version:\s*"([^"]*)"', content)
         return match.group(1) if match else None
     except Exception:
@@ -189,7 +189,7 @@ def _get_installed_version(tool: str, level: str) -> Optional[str]:
 def _inject_version_to_agents_md(agents_path: Path) -> None:
     """Inject a version comment into the NLM section of AGENTS.md."""
     try:
-        content = agents_path.read_text()
+        content = agents_path.read_text(encoding="utf-8")
         version_comment = f"<!-- nlm-version: {__version__} -->"
 
         # Remove any existing version comment
@@ -202,7 +202,7 @@ def _inject_version_to_agents_md(agents_path: Path) -> None:
                 start_marker,
                 f"{start_marker}\n{version_comment}",
             )
-            agents_path.write_text(content)
+            agents_path.write_text(content, encoding="utf-8")
     except Exception:
         pass
 
@@ -241,11 +241,11 @@ def install_agents_md(install_path: Path) -> None:
     """Install/update AGENTS.md format (append with markers)."""
     data_dir = get_data_dir()
     section_src = data_dir / "AGENTS_SECTION.md"
-    section_content = section_src.read_text()
+    section_content = section_src.read_text(encoding="utf-8")
 
     # Read existing AGENTS.md or create new
     if install_path.exists():
-        content = install_path.read_text()
+        content = install_path.read_text(encoding="utf-8")
 
         # Check if already installed
         if "<!-- nlm-skill-start -->" in content:
@@ -272,7 +272,7 @@ def install_agents_md(install_path: Path) -> None:
         install_path.parent.mkdir(parents=True, exist_ok=True)
         content = section_content + "\n"
 
-    install_path.write_text(content)
+    install_path.write_text(content, encoding="utf-8")
 
     # Inject version marker into the NLM section
     _inject_version_to_agents_md(install_path)
@@ -359,7 +359,7 @@ nlm skill install <tool>
 Where `<tool>` is: claude-code, opencode, gemini-cli, antigravity, or codex.
 """
 
-    (install_path / "README.md").write_text(readme_content)
+    (install_path / "README.md").write_text(readme_content, encoding="utf-8")
 
     console.print(f"[green]✓[/green] Exported all formats to {install_path}")
     console.print(f"  [dim]• nlm-skill/ (skill directory for Claude Code, OpenCode, Gemini, Antigravity)")
@@ -535,7 +535,7 @@ def uninstall(
         elif format_type == "agents.md":
             # Remove section from AGENTS.md
             if install_path.exists():
-                content = install_path.read_text()
+                content = install_path.read_text(encoding="utf-8")
                 start_marker = "<!-- nlm-skill-start -->"
                 end_marker = "<!-- nlm-skill-end -->"
 
@@ -556,7 +556,7 @@ def uninstall(
                     else:
                         content = ""
 
-                    install_path.write_text(content)
+                    install_path.write_text(content, encoding="utf-8")
                     console.print(f"[green]✓[/green] Removed NLM section from {install_path}")
                 else:
                     console.print(f"[yellow]![/yellow] Markers not found in {install_path}")
@@ -742,5 +742,5 @@ def show() -> None:
         console.print(f"[red]Error:[/red] SKILL.md not found")
         raise typer.Exit(1)
 
-    content = skill_file.read_text()
+    content = skill_file.read_text(encoding="utf-8")
     console.print(content)

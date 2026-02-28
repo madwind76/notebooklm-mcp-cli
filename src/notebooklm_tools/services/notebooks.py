@@ -89,6 +89,13 @@ def list_notebooks(
     except Exception as e:
         raise ServiceError(f"Failed to list notebooks: {e}")
 
+    # Sort notebooks by modification date (primary) or creation date (secondary), descending
+    # ISO strings sort correctly as strings.
+    notebooks.sort(
+        key=lambda x: (x.modified_at or "", x.created_at or ""),
+        reverse=True
+    )
+
     owned_count = sum(1 for nb in notebooks if nb.is_owned)
     shared_count = len(notebooks) - owned_count
     shared_by_me_count = sum(1 for nb in notebooks if nb.is_owned and nb.is_shared)

@@ -648,7 +648,7 @@ class BaseClient:
                 debug_dir = Path.home() / ".notebooklm-mcp-cli"
                 debug_dir.mkdir(exist_ok=True)
                 debug_path = debug_dir / "debug_page.html"
-                debug_path.write_text(html)
+                debug_path.write_text(html, encoding="utf-8")
                 raise ValueError(
                     f"Could not extract CSRF token from page. "
                     f"Page saved to {debug_path} for debugging. "

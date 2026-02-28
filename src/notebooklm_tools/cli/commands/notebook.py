@@ -34,7 +34,8 @@ def list_notebooks(
     """List all notebooks."""
     try:
         with get_client(profile) as client:
-            notebooks = client.list_notebooks()
+            result = notebooks_service.list_notebooks(client)
+            notebooks = result["notebooks"]
         
         fmt = detect_output_format(json_output, quiet, title)
         formatter = get_formatter(fmt, console)

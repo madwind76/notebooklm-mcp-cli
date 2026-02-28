@@ -121,10 +121,20 @@ class TableFormatter(Formatter):
             table.add_column("Created", no_wrap=True, width=10)
 
         for nb in notebooks:
-            # Handle both source_count and sources_count for compatibility
-            src_count = getattr(nb, 'source_count', None) or getattr(nb, 'sources_count', 0)
-            # Handle both modified_at and updated_at - format as short date
-            updated = getattr(nb, 'modified_at', None) or getattr(nb, 'updated_at', None)
+            if isinstance(nb, dict):
+                nb_id = nb.get('id', '')
+                nb_title = nb.get('title', 'Untitled')
+                src_count = nb.get('source_count') or nb.get('sources_count', 0)
+                updated = nb.get('modified_at') or nb.get('updated_at')
+                created = nb.get('created_at')
+            else:
+                nb_id = str(nb.id)
+                nb_title = nb.title
+                src_count = getattr(nb, 'source_count', None) or getattr(nb, 'sources_count', 0)
+                updated = getattr(nb, 'modified_at', None) or getattr(nb, 'updated_at', None)
+                created = getattr(nb, 'created_at', None)
+
+            # Format updated date
             if updated:
                 if isinstance(updated, str):
                     updated_str = updated[:10]  # Just the date part
@@ -134,13 +144,12 @@ class TableFormatter(Formatter):
                 updated_str = "-"
             
             row = [
-                str(nb.id),  # Full ID for copy/paste
-                nb.title,
+                nb_id,
+                nb_title,
                 str(src_count),
                 updated_str,
             ]
             if full:
-                created = getattr(nb, 'created_at', None)
                 if created:
                     created_str = created[:10] if isinstance(created, str) else created.strftime("%Y-%m-%d")
                 else:
@@ -289,12 +298,22 @@ class JsonFormatter(Formatter):
     ) -> None:
         data = []
         for nb in notebooks:
-            src_count = getattr(nb, 'source_count', None) or getattr(nb, 'sources_count', 0)
-            item = {"id": nb.id, "title": nb.title, "source_count": src_count}
-            updated = getattr(nb, 'modified_at', None) or getattr(nb, 'updated_at', None)
+            if isinstance(nb, dict):
+                nb_id = nb.get('id', '')
+                nb_title = nb.get('title', 'Untitled')
+                src_count = nb.get('source_count') or nb.get('sources_count', 0)
+                updated = nb.get('modified_at') or nb.get('updated_at')
+                created = nb.get('created_at')
+            else:
+                nb_id = str(nb.id)
+                nb_title = nb.title
+                src_count = getattr(nb, 'source_count', None) or getattr(nb, 'sources_count', 0)
+                updated = getattr(nb, 'modified_at', None) or getattr(nb, 'updated_at', None)
+                created = getattr(nb, 'created_at', None)
+
+            item = {"id": nb_id, "title": nb_title, "source_count": src_count}
             if updated:
                 item["updated_at"] = updated if isinstance(updated, str) else updated.isoformat()
-            created = getattr(nb, 'created_at', None)
             if full and created:
                 item["created_at"] = created if isinstance(created, str) else created.isoformat()
             data.append(item)
@@ -379,10 +398,17 @@ class CompactFormatter(Formatter):
         title_only: bool = False,
     ) -> None:
         for nb in notebooks:
-            if title_only:
-                print(f"{nb.id}: {nb.title}")
+            if isinstance(nb, dict):
+                nb_id = nb.get('id', '')
+                nb_title = nb.get('title', 'Untitled')
             else:
-                print(nb.id)
+                nb_id = str(nb.id)
+                nb_title = nb.title
+
+            if title_only:
+                print(f"{nb_id}: {nb_title}")
+            else:
+                print(nb_id)
 
     def format_sources(
         self,
